@@ -2,13 +2,13 @@
 
 Um jogo de Campo Minado desenvolvido em React com histórico de versões progressivas! Veja a evolução das funcionalidades através das diferentes releases.
 
-![Minesweeper Preview](https://via.placeholder.com/400x250.png?text=Preview+do+Jogo) **(Adicione uma imagem real do projeto aqui)***
+![Minesweeper Preview](./doc/preview.png)
 
 ## 🚀 Como Baixar
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/campo-minado.git
+git clone https://github.com/FelipeMandelli/CampoMinado.git
 
 # Navegue para a versão desejada
 git checkout TAG_DA_VERSAO
@@ -95,23 +95,3 @@ http://localhost:3000
 - Use ❗**clique esquerdo** para revelar células
 - Use ❗**clique direito** (versão 3.0+) para colocar bandeiras
 - ⚡**Duplo clique** (versão 3.0+) para revelar áreas seguras
-
----
-
-**Divirta-se explorando a evolução do projeto!** 🎉  
-*De um simples grid a um jogo completo com todas as mecânicas!* 🚀
-
-```
-
-Para usar efetivamente:
-1. Substitua `seu-usuario` pelo seu username do GitHub
-2. Adicione uma imagem real do jogo no lugar do placeholder
-3. Personalize as seções de tecnologias se necessário
-4. Adicione seu próprio estilo CSS se quiser mais personalização
-
-Este README fornece:
-:white_check_mark: Visual atraente com emojis  
-:white_check_mark: Instruções claras de download  
-:white_check_mark: Histórico de versões intuitivo  
-:white_check_mark: Dicas de uso práticas  
-:white_check_mark: Seção de tecnologias organizada
