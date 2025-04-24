@@ -9,7 +9,7 @@ type Cell = {
 const GRID_SIZE = 10;
 const MINES_COUNT = 15;
 
-function generateGrid(): Cell[][] {
+function generateGrid(excludeX?: number, excludeY?: number): Cell[][] {
   const grid: Cell[][] = Array.from({ length: GRID_SIZE }, () =>
     Array.from({ length: GRID_SIZE }, () => ({
       isMine: false,
@@ -22,7 +22,12 @@ function generateGrid(): Cell[][] {
   while (minesPlaced < MINES_COUNT) {
     const x = Math.floor(Math.random() * GRID_SIZE);
     const y = Math.floor(Math.random() * GRID_SIZE);
-    if (!grid[x][y].isMine) {
+
+    if (
+      !grid[x][y].isMine &&
+      (excludeX === undefined ||
+        (Math.abs(x - excludeX) > 1 || Math.abs(y - excludeY) > 1))
+    ) {
       grid[x][y].isMine = true;
       minesPlaced++;
     }
@@ -57,12 +62,18 @@ function generateGrid(): Cell[][] {
 export default function Minesweeper() {
   const [grid, setGrid] = useState<Cell[][]>(generateGrid());
   const [gameOver, setGameOver] = useState(false);
+  const [firstClick, setFirstClick] = useState(true);
 
   function revealCell(x: number, y: number) {
     if (gameOver || grid[x][y].revealed) return;
-    
-    const newGrid = [...grid];
-    
+
+    let newGrid = grid;
+
+    if (firstClick) {
+      newGrid = generateGrid(x, y);
+      setFirstClick(false);
+    }
+
     if (newGrid[x][y].isMine) {
       setGameOver(true);
       alert("Game Over! Você atingiu uma mina.");
@@ -90,12 +101,21 @@ export default function Minesweeper() {
     };
 
     reveal(x, y);
-    setGrid(newGrid);
+    setGrid([...newGrid]);
+  }
+
+  function resetGame() {
+    setGrid(generateGrid());
+    setGameOver(false);
+    setFirstClick(true);
   }
 
   return (
     <div className="flex flex-col items-center mt-10">
       <h1 className="text-2xl font-bold">Campo Minado</h1>
+      <button onClick={resetGame} className="mt-2 p-2 bg-blue-500 text-white rounded">
+        Resetar Jogo
+      </button>
       <div className="grid grid-cols-10 gap-1 mt-4 border p-2">
         {grid.map((row, x) =>
           row.map((cell, y) => (
@@ -111,7 +131,7 @@ export default function Minesweeper() {
           ))
         )}
       </div>
-      {gameOver && <p className="mt-4 text-red-600">Game Over! Recarregue a página para recomeçar.</p>}
+      {gameOver && <p className="mt-4 text-red-600">Game Over! Pressione reset para recomeçar.</p>}
     </div>
   );
 }
