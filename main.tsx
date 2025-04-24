@@ -4,6 +4,7 @@ type Cell = {
   isMine: boolean;
   revealed: boolean;
   adjacentMines: number;
+  flagged: boolean;
 };
 
 const GRID_SIZE = 10;
@@ -15,6 +16,7 @@ function generateGrid(excludeX?: number, excludeY?: number): Cell[][] {
       isMine: false,
       revealed: false,
       adjacentMines: 0,
+      flagged: false,
     }))
   );
 
@@ -60,12 +62,12 @@ function generateGrid(excludeX?: number, excludeY?: number): Cell[][] {
 }
 
 export default function Minesweeper() {
-  const [grid, setGrid] = useState<Cell[][]>(generateGrid());
+  const [grid, setGrid] = useState<Cell[][]>(generateGrid);
   const [gameOver, setGameOver] = useState(false);
   const [firstClick, setFirstClick] = useState(true);
 
   function revealCell(x: number, y: number) {
-    if (gameOver || grid[x][y].revealed) return;
+    if (gameOver || grid[x][y].revealed || grid[x][y].flagged) return;
 
     let newGrid = grid;
 
@@ -86,15 +88,19 @@ export default function Minesweeper() {
         cx >= GRID_SIZE ||
         cy < 0 ||
         cy >= GRID_SIZE ||
-        newGrid[cx][cy].revealed
-      ) return;
+        newGrid[cx][cy].revealed ||
+        newGrid[cx][cy].flagged
+      )
+        return;
 
       newGrid[cx][cy].revealed = true;
 
       if (newGrid[cx][cy].adjacentMines === 0) {
         for (let dx = -1; dx <= 1; dx++) {
           for (let dy = -1; dy <= 1; dy++) {
-            reveal(cx + dx, cy + dy);
+            if (dx !== 0 || dy !== 0) {
+              reveal(cx + dx, cy + dy);
+            }
           }
         }
       }
@@ -102,6 +108,51 @@ export default function Minesweeper() {
 
     reveal(x, y);
     setGrid([...newGrid]);
+  }
+
+  function toggleFlag(x: number, y: number, event: React.MouseEvent) {
+    event.preventDefault();
+    if (grid[x][y].revealed) return;
+    const newGrid = grid.map((row) => row.map((cell) => ({ ...cell })));
+    newGrid[x][y].flagged = !newGrid[x][y].flagged;
+    setGrid(newGrid);
+  }
+
+  function revealAdjacent(x: number, y: number) {
+    if (!grid[x][y].revealed) return;
+    let flagCount = 0;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (
+          nx >= 0 &&
+          nx < GRID_SIZE &&
+          ny >= 0 &&
+          ny < GRID_SIZE &&
+          grid[nx][ny].flagged
+        ) {
+          flagCount++;
+        }
+      }
+    }
+    if (flagCount === grid[x][y].adjacentMines) {
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (
+            nx >= 0 &&
+            nx < GRID_SIZE &&
+            ny >= 0 &&
+            ny < GRID_SIZE &&
+            !grid[nx][ny].flagged
+          ) {
+            revealCell(nx, ny);
+          }
+        }
+      }
+    }
   }
 
   function resetGame() {
@@ -122,11 +173,13 @@ export default function Minesweeper() {
             <button
               key={`${x}-${y}`}
               className={`w-10 h-10 flex items-center justify-center border text-lg font-bold ${
-                cell.revealed ? "bg-gray-300" : "bg-gray-500"
+                cell.revealed ? (cell.isMine ? "bg-red-500 text-white" : "bg-gray-300") : "bg-gray-500"
               }`}
               onClick={() => revealCell(x, y)}
+              onContextMenu={(e) => toggleFlag(x, y, e)}
+              onDoubleClick={() => revealAdjacent(x, y)}
             >
-              {cell.revealed && !cell.isMine ? cell.adjacentMines || "" : ""}
+              {cell.flagged ? "🚩" : cell.revealed && !cell.isMine ? cell.adjacentMines || "" : ""}
             </button>
           ))
         )}
